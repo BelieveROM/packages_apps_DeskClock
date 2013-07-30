@@ -314,6 +314,9 @@ public class AlarmClock extends Activity implements LoaderManager.LoaderCallback
     public void onLoadFinished(Loader<Cursor> cursorLoader, final Cursor data) {
         mAdapter.swapCursor(data);
         gotoAlarmIfSpecified();
+        // Setting the empty view after swapCursor prevents the view from
+        // flickering on the first run.
+        mAlarmsList.setEmptyView(findViewById(android.R.id.empty));
     }
 
     /** If an alarm was passed in via intent and goes to that particular alarm in the list. */
@@ -453,15 +456,7 @@ public class AlarmClock extends Activity implements LoaderManager.LoaderCallback
         private final boolean mHasVibrator;
 
         // This determines the order in which it is shown and processed in the UI.
-        private final int[] DAY_ORDER = new int[] {
-                Calendar.SUNDAY,
-                Calendar.MONDAY,
-                Calendar.TUESDAY,
-                Calendar.WEDNESDAY,
-                Calendar.THURSDAY,
-                Calendar.FRIDAY,
-                Calendar.SATURDAY,
-        };
+        private final int[] DAY_ORDER;
 
         public class ItemHolder {
 
@@ -539,6 +534,16 @@ public class AlarmClock extends Activity implements LoaderManager.LoaderCallback
 
             mHasVibrator = ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE))
                     .hasVibrator();
+
+
+            DAY_ORDER = new int[7];
+            int firstDay = Calendar.getInstance().getFirstDayOfWeek();
+            int day;
+            for(day = 0; day < 7; day++)
+            {
+                DAY_ORDER[day] = firstDay;
+                firstDay = firstDay % 7 + 1;
+            }
         }
 
         public void removeSelectedId(int id) {
